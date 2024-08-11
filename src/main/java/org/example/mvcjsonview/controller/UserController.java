@@ -1,7 +1,9 @@
 package org.example.mvcjsonview.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.Valid;
 import org.example.mvcjsonview.entity.User;
+import org.example.mvcjsonview.entity.UserViews;
 import org.example.mvcjsonview.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,8 +17,12 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
 
+    private final UserService userService;
+
     @Autowired
-    private UserService userService;
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody @Valid User user) {
@@ -25,12 +31,14 @@ public class UserController {
     }
 
     @GetMapping
+    @JsonView(UserViews.UserSummary.class)
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
+    @JsonView(UserViews.UserDetails.class)
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
         return userService.getUserById(id)
                 .map(user -> new ResponseEntity<>(user, HttpStatus.OK))
